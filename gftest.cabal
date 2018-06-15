@@ -1,0 +1,32 @@
+name: gftest
+version: 0.1
+homepage:            https://github.com/GrammaticalFramework/gftest#readme
+license-file:        LICENSE
+author:              Inari Listenmaa
+maintainer:          inari.listenmaa@gmail.com
+category:            Natural Language Processing
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version: >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Grammar
+  other-modules:       Mu, Graph, FMap, EqRel
+  build-depends:       base
+                     , containers
+                     , pgf2
+
+executable gftest
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  build-depends:       base
+                     , pgf2
+                     , cmdargs
+                     , containers
+                     , filepath
+                     , gf-tools
+
+source-repository head
+  type:     git
+  location: https://github.com/GrammaticalFramework/gftest
