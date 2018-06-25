@@ -55,8 +55,7 @@ instructions in INSTALL
 
 ### Install gftest
 
-Go to
-[GF/src/tools](https://github.com/GrammaticalFramework/GF/tree/master/src/tools),
+Clone this repository `git clone https://github.com/GrammaticalFramework/gftest.git`. In the root directory (`gftest`),
 do `cabal install`. It creates an executable `gftest`.
 
 
