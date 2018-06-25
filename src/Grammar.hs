@@ -762,7 +762,7 @@ emptyFields :: Grammar -> [(ConcrCat,S.Set Int)]
 emptyFields gr = cs `zip` fields
  where
   cs     = S.toList (nonEmptyCats gr)
-  fields = Mu.mu (S.fromList [0..99999]) defs cs 
+  fields = Mu.mu S.empty defs cs
 
   defs =
     [ (c, ys, h)
@@ -983,8 +983,8 @@ testFun debug gr trans startcat funname =
   testcase_ctxs = M.toList $ M.fromListWith (++) $ uniqueTCs++commonTCs
 
   uniqueTCs = [ (testcase,uniqueCtxs)
-   | (testcase,ctxs) <- M.elems cat_testcase_ctxs
-   , let uniqueCtxs = deleteFirstsBy applyHole ctxs commonCtxs
+   | (cat,(testcase,ctxs)) <- M.toList cat_testcase_ctxs
+   , let uniqueCtxs = deleteFirstsBy applyHole ctxs (commonCtxs cat)
    , not $ null uniqueCtxs
    ]
   commonTCs = [ (App newTop subtrees,ctxs)
@@ -1032,8 +1032,9 @@ testFun debug gr trans startcat funname =
   allCtxs = [ ctx | (_,ctxs) <- M.elems cat_testcase_ctxs
                   , ctx <- ctxs ] :: [Tree->Tree]
 
-  commonCtxs = nubBy applyHole [ ctx | (_,_,ctxs) <- coercion_goalcats_commonCtxs
-                               , ctx <- ctxs ] :: [Tree->Tree]
+  commonCtxs cat = nubBy applyHole [ ctx | (_,cats,ctxs) <- coercion_goalcats_commonCtxs
+                                   , cat `elem` cats
+                                   , ctx <- ctxs ] :: [Tree->Tree]
 
 
 testTree :: Bool -> Grammar -> [Grammar] -> Tree -> Int -> [Tree -> Tree] -> Result

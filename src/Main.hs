@@ -32,7 +32,7 @@ data GfTest
   , show_funs     :: Bool
   , funs_of_arity :: Maybe Int
   , show_coercions:: Bool
-  , show_contexts :: Maybe Int
+  , show_contexts :: String
   , concr_string  :: String
 
   -- Information about fields
@@ -70,7 +70,7 @@ gftest = GfTest
   , show_funs     = def                 &= help "Show all available functions"
   , funs_of_arity = def &= A.typ "2"    &= help "Show all functions of arity 2"
   , show_coercions= def                 &= help "Show coercions in the grammar"
-  , show_contexts = def &= A.typ "8410" &= help "Show contexts for a given concrete type (given as FId)"
+  , show_contexts = def &= A.typ "8140"  &= help "Show contexts for a given concrete type or a range of concrete types (given as FIds)"
   , debug         = def                 &= help "Show debug output"
   , equal_fields  = def &= A.name "q"   &= help "Show fields whose strings are always identical"
   , empty_fields  = def &= A.name "e"   &= help "Show fields whose strings are always empty"
@@ -114,12 +114,12 @@ main = do
          where
           s    = top t
           c    = snd (ctyp s)
-          cs   = c:[ coe
-                   | (cat,coe) <- coercions gr
-                   , c == cat ]
-          ctxs = concat [ contextsFor gr sc cat
-                        | sc <- ccats gr startcat
-                        , cat <- cs ]
+          -- cs   = c:[ coe --TODO fix: generates way too much
+          --          | (cat,coe) <- coercions gr
+          --          , c == cat ]
+          ctxs = concat [ contextsFor gr sc c
+                        | sc <- ccats gr startcat ]
+                        -- , cat <- cs ]
 
         output = -- Print to stdout or write to a file
          if write_to_file args 
@@ -188,12 +188,17 @@ main = do
 -- Information about the grammar
 
     -- Show contexts for a particular concrete category
+    let printCtx fid = do print fid
+                          mapM_ print
+                            [ ctx dummyHole
+                            | start <- ccats gr startcat
+                            , ctx <- contextsFor gr start (mkCC gr fid) ]
     case show_contexts args of
-      Nothing  -> return ()
-      Just fid -> mapM_ print
-                    [ ctx dummyHole
-                    | start <- ccats gr startcat
-                    , ctx <- contextsFor gr start (mkCC gr fid) ]
+      "" -> return ()
+      xs -> case map read $ words xs of
+              (bg:end:_) -> mapM_ printCtx [bg..end]
+              [fid]      -> printCtx fid
+              _          -> putStrLn "--show-contexts: single category (10) or a range (\"10 100\") expected"
 
     -- Show available categories
     when (show_cats args) $ do
