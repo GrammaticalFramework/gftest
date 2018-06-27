@@ -8,6 +8,9 @@ representative and minimal set of example sentences for a human to look at.
 There are examples of actual generated test cases later in this
 document, as well as the full list of options to give to `gftest`.
 
+**It is recommended to compile your PGF with the gf flag `--optimize-pgf`**, otherwise this tool can be very slow.
+For example, `gf -make --optimize-pgf LangEng.gf`.
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -97,6 +100,9 @@ Common flags:
 
 Give the PGF grammar as an argument with `-g`. If the file is not in
 the same directory, you need to give the full file path.
+
+**It is recommended to compile your PGF with the gf flag `--optimize-pgf`**, otherwise this tool can be very slow.
+For example, `gf -make --optimize-pgf FoodsEng.gf FoodsGer.gf`.
 
 You can give the grammar with or without `.pgf`. 
 
@@ -509,6 +515,9 @@ Examples:
     Pred (These (Mod ∅ Pizza)) Vegan
     Pred (These Pizza) ∅
 ```
+
+* You can also give it a range of arguments, with starting and ending category in quotes: `gftest -g Foods -l Spa --show-contexts "7 10"`
+
 
 * Check out from [`--show-coercions`](#--show-coercions) how to find
 coercions, and you can try `--show-contexts` with them:
