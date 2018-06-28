@@ -285,7 +285,7 @@ main = do
                   [ length (seqs f)
                   | (b,a) <- coercions gr, a == c
                   , f <- symbols gr, snd (ctyp f) == b ]
-                 notUsed = [ i | i <- [0..ar-1], i `notElem` is ]
+                 notUsed = [ i | i <- [0..ar-1], i `notElem` (S.toList is) ]
            , not (null notUsed)
            ]
       putStrLn "### Unused fields:"
