@@ -224,7 +224,7 @@ toGrammar pgf langName =
             [ symb
             | symb <- symbols gr
             , snd (typ symb) == c
-            , snd (ctyp symb) `elem` nonEmptyCats gr ]
+            , snd (ctyp symb) `S.member` nonEmptyCats gr ]
 
         , coercions =
             [ ( mkCC cfid, CC Nothing afid )
@@ -532,7 +532,7 @@ contexts gr top =
   | (c, paths) <- cs `zip` pathss
   ]
  where
-  pathss = Mu.muDiff F.nil F.isNil dif uni defs cs
+  pathss = Mu.mu F.nil defs cs
   cs     = S.toList (nonEmptyCats gr)
   
   -- all symbols with at least one argument, and only good arguments
