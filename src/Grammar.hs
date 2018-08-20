@@ -1089,8 +1089,8 @@ bestTrees fun gr cats =
   , i <- [0..card-1]
   ]
 
-testsAsWellAs :: (Eq a, Eq b) => [a] -> [b] -> Bool
-xs `testsAsWellAs` ys = go (xs `zip` ys)
+subsumes :: (Eq a, Eq b) => [a] -> [b] -> Bool
+xs `subsumes` ys = go (xs `zip` ys)
  where
   go [] =
     True
@@ -1101,24 +1101,24 @@ xs `testsAsWellAs` ys = go (xs `zip` ys)
 
 
 bestExamples :: Symbol -> Grammar -> [[Tree]] -> [[Tree]]
-bestExamples fun gr vtrees = go [] vtrees_lins
+bestExamples fun gr vtrees = map fst $ foldr f [] vtrees_lins
  where
   syncategorematics = concatMap (lefts . concrSeqs gr) (seqs fun)
   vtrees_lins = [ (vtree, syncategorematics ++
                   concatMap (map snd . tabularLin gr) vtree) --linearise all trees at once
-                 | vtree <- vtrees ] :: [([Tree],[String])]
+                 | vtree <- vtrees ] :: [TestCase]
 
-  go cur []  = map fst cur
-  go cur (vt@(ts,lins):vts)
-    | any (`testsAsWellAs` lins) (map snd cur) = go cur vts
-    | otherwise = go' (vt:[ c | c@(_,clins) <- cur
-                              , not (lins `testsAsWellAs` clins) ])
-                      vts
+  -- This results in fewer example trees, but maybe misses some chances for bugs.
+  -- vtrees_lins = [ (vtree,
+  --                 (map snd . tabularLin gr) (App fun vtree)) --apply fun to trees and linearise result
+  --                | vtree <- vtrees ] :: [([Tree],[String])]
 
-  go' cur vts | enough cur = map fst cur
-              | otherwise  = go cur vts
+  subsumesT :: TestCase -> TestCase -> Bool
+  subsumesT (_,s) (_,t) = subsumes s t
 
-  enough :: [([Tree],[String])] -> Bool
-  enough [(_,lins)] = all singleton (group $ sort lins) -- can stop earlier but let's not do that
-  enough _          = False
- 
+  f :: TestCase -> [TestCase] -> [TestCase]
+  f t ts = if any (`subsumesT` t) ts
+             then ts
+             else t : filter (not . subsumesT t) ts
+
+type TestCase = ([Tree],[String])
