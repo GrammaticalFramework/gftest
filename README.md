@@ -45,16 +45,22 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 
 You need the library `PGF2`. Here are instructions how to install:
 
-1) Install C runtime: go to the directory [GF/src/runtime/c](https://github.com/GrammaticalFramework/GF/tree/master/src/runtime/c), see
+1) **Install C runtime**: go to the directory [gf-core/src/runtime/c](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/c), see
 instructions in INSTALL
-1) Install PGF2 in one of the two ways:
-  * **EITHER** Go to the directory
-   [GF/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/GF/tree/master/src/runtime/haskell-bind),
+1) **Install PGF2** in one of the two ways:
+  * *EITHER* Go to the directory
+   [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind),
    do `cabal install`
-  * **OR**  Go to the root directory of
-    [GF](https://github.com/GrammaticalFramework/GF/) and compile GF
+  * *OR*  Go to the root directory of
+    [gf-core](https://github.com/GrammaticalFramework/gf-core/) and compile GF
     with C-runtime system support: `cabal
     install -fc-runtime`, see more information [here](http://www.grammaticalframework.org/doc/gf-developers.html#toc16).
+    
+If you get **problems**, try the following:
+   * Remember that you only need the library `PGF2`, nothing else (e.g. the `gf` executable doesn't need to work with the C runtime). If you tried installing GF with C-runtime system support, try the lighter version (only installing [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind)). If that didn't work either, comment out all executables from the cabal file in [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind) and try again.
+   * Libraries not found? Find where they are installed, and try the cabal options `--extra-lib-dirs` or `--extra-include-dirs`. 
+   * You don't know where to find your libraries yourself? Type `ghc-pkg list` for globally installed packages, and `ghc-pkg list --user` for local. Then you get an output that starts with a directory on your computer. Go to that directory (e.g. `/Users/<your name>/.ghc/<version>/package.conf.d` on a mac), open the conf file for the library you're looking for (e.g. `/<the previous path>/pgf2-0.1.0.0-Dlg7UYqHGJjFEoG8RlgBvb.conf`) and there you find the path you're looking for under `library-dirs:`.
+   * Any other problem? Contact me: you can e.g. open an issue at GitHub, come to the [#gf IRC channel](https://webchat.freenode.net/?channels=gf), send an email to [gf-dev list](https://groups.google.com/forum/#!forum/gf-dev) or personally to me (inari.listenmaa@gmail.com)
 
 ### Install gftest
 
