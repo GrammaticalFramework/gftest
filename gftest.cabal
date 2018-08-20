@@ -21,6 +21,7 @@ library
 executable gftest
   hs-source-dirs:      src
   main-is:             Main.hs
+  other-modules:       Grammar, Mu, Graph, FMap, EqRel
   build-depends:       base
                      , pgf2
                      , cmdargs
