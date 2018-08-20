@@ -45,14 +45,14 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 
 You need the library `PGF2`. Here are instructions how to install:
 
-1) Install C runtime: go to the directory [GF/src/runtime/c](https://github.com/GrammaticalFramework/GF/tree/master/src/runtime/c), see
+1) **Install C runtime**: go to the directory [gf-core/src/runtime/c](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/c), see
 instructions in INSTALL
-1) Install PGF2 in one of the two ways:
-  * **EITHER** Go to the directory
-   [GF/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/GF/tree/master/src/runtime/haskell-bind),
+1) **Install PGF2** in one of the two ways:
+  * *EITHER* Go to the directory
+   [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind),
    do `cabal install`
-  * **OR**  Go to the root directory of
-    [GF](https://github.com/GrammaticalFramework/GF/) and compile GF
+  * *OR*  Go to the root directory of
+    [gf-core](https://github.com/GrammaticalFramework/gf-core/) and compile GF
     with C-runtime system support: `cabal
     install -fc-runtime`, see more information [here](http://www.grammaticalframework.org/doc/gf-developers.html#toc16).
 
