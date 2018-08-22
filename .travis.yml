@@ -13,11 +13,10 @@ before_install:
   - sudo make install
   - cd ../haskell-bind
   - cabal install
-  - cd
   - cabal install cmdargs
 
 install:
-  - echo "installing gftest"
+  - cabal build
 
 script:
   - echo "Hello world"
