@@ -4,7 +4,7 @@ branches:
   only:
     - master
 
-before_script:
+before_install:
   - git clone https://github.com/GrammaticalFramework/gf-core.git
   - cd gf-core/src/runtime/c/
   - autoreconf -i
@@ -14,6 +14,9 @@ before_script:
   - cd ../haskell-bind
   - cabal install
   - cabal install cmdargs
+
+install:
+  - echo "skip default install"
 
 script:
   - cd $TRAVIS_BUILD_DIR
