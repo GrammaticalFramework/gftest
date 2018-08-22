@@ -4,5 +4,18 @@ branches:
   only:
     - master
 
-install:
+before-install:
+  - git clone https://github.com/GrammaticalFramework/gf-core.git
+  - cd gf-core/src/runtime/c/
+  - autoreconf -i
+  - ./configure
+  - make
+  - make install
+  - cd ../haskell-bind
+  - cabal install
+  - cd
+  - cabal install cmdargs
+  
+
+script:
   - echo "Hello world"
