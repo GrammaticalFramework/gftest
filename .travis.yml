@@ -1,0 +1,8 @@
+language: haskell
+
+branches:
+  only:
+- master
+
+install:
+  - echo "Hello world"
