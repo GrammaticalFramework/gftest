@@ -4,7 +4,7 @@ branches:
   only:
     - master
 
-before_install:
+before_script:
   - git clone https://github.com/GrammaticalFramework/gf-core.git
   - cd gf-core/src/runtime/c/
   - autoreconf -i
@@ -16,5 +16,5 @@ before_install:
   - cabal install cmdargs
 
 script:
+  - cd $TRAVIS_BUILD_DIR
   - cabal build
-  - echo "Hello world!"
