@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/GrammaticalFramework/gftest.svg?branch=master)](https://travis-ci.com/GrammaticalFramework/gftest)
+
 # gftest: Automatic test case generation for GF grammars
 
 `gftest` is a program for automatically generating systematic test
@@ -43,7 +45,9 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 
 ### Prerequisites
 
-You need the library `PGF2`. Here are instructions how to install:
+In a compact form: just check out instructions in this [Travis file](https://github.com/GrammaticalFramework/gftest/blob/master/.travis.yml#L7-L16).
+
+You need the library `PGF2`, which in turn needs the C runtime for GF. Here are instructions how to install:
 
 1) **Install C runtime**: go to the directory [gf-core/src/runtime/c](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/c), see
 instructions in INSTALL

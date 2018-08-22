@@ -16,7 +16,7 @@ before_install:
   - cabal install cmdargs
 
 install:
-  - echo "skip default install"
+  - echo "Next: installing gftest."
 
 script:
   - cd $TRAVIS_BUILD_DIR
