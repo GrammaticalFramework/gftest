@@ -45,8 +45,11 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 
 ### Prerequisites
 
-In a compact form: just check out instructions in this [Travis file](https://github.com/GrammaticalFramework/gftest/blob/master/.travis.yml#L7-L16).
+#### Compact form
+Check out instructions in this [Travis file](https://github.com/GrammaticalFramework/gftest/blob/master/.travis.yml#L7-L16).
 
+
+#### Verbose form
 You need the library `PGF2`, which in turn needs the C runtime for GF. Here are instructions how to install:
 
 1) **Install C runtime**: go to the directory [gf-core/src/runtime/c](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/c), see
