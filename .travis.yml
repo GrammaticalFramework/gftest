@@ -14,3 +14,10 @@ before_install:
   - cd ../haskell-bind
   - cabal install
   - cabal install cmdargs
+  - cd
+
+install:
+  - cabal build
+
+script:
+  - echo "Hello world!"
