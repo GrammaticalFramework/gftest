@@ -16,6 +16,7 @@ before_install:
   - cabal install cmdargs
 
 install:
+  - cd
   - cabal build
 
 script:
