@@ -17,5 +17,8 @@ before-install:
   - cabal install cmdargs
   
 
+install:
+  - echo "installing gftest"
+
 script:
   - echo "Hello world"
