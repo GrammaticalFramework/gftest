@@ -2,7 +2,7 @@ language: haskell
 
 branches:
   only:
-- master
+    - master
 
 install:
   - echo "Hello world"
