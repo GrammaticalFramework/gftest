@@ -62,18 +62,18 @@ instructions in INSTALL
     [gf-core](https://github.com/GrammaticalFramework/gf-core/) and compile GF
     with C-runtime system support: `cabal
     install -fc-runtime`, see more information [here](http://www.grammaticalframework.org/doc/gf-developers.html#toc16).
-    
+
 If you get **problems**, try the following:
    * Remember that you only need the library `PGF2`, nothing else (e.g. the `gf` executable doesn't need to work with the C runtime). If you tried installing GF with C-runtime system support, try the lighter version (only installing [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind)). If that didn't work either, comment out all executables from the cabal file in [gf-core/src/runtime/haskell-bind](https://github.com/GrammaticalFramework/gf-core/tree/master/src/runtime/haskell-bind) and try again.
-   * Libraries not found? Find where they are installed, and try the cabal options `--extra-lib-dirs` or `--extra-include-dirs`. 
+   * Libraries not found? Find where they are installed, and try the cabal options `--extra-lib-dirs` or `--extra-include-dirs`.
    * You don't know where to find your libraries yourself? Type `ghc-pkg list` for globally installed packages, and `ghc-pkg list --user` for local. Then you get an output that starts with a directory on your computer. Go to that directory (e.g. `/Users/<your name>/.ghc/<version>/package.conf.d` on a mac), open the conf file for the library you're looking for (e.g. `/<the previous path>/pgf2-0.1.0.0-Dlg7UYqHGJjFEoG8RlgBvb.conf`) and there you find the path you're looking for under `library-dirs:`.
    * Any other problem? Contact me: you can e.g. open an issue at GitHub, come to the [#gf IRC channel](https://webchat.freenode.net/?channels=gf), send an email to [gf-dev list](https://groups.google.com/forum/#!forum/gf-dev) or personally to me (inari.listenmaa@gmail.com)
 
 ### Install gftest
 
-Clone this repository `git clone https://github.com/GrammaticalFramework/gftest.git`. In the root directory (`gftest`),
-do `cabal install`. It creates an executable `gftest`.
-
+Clone this repository `git clone https://github.com/GrammaticalFramework/gftest.git`.
+In the root directory (`gftest`), do `cabal install`, or alternatively `stack install`.
+This creates an executable `gftest`.
 
 ## Common use cases
 
@@ -117,7 +117,7 @@ the same directory, you need to give the full file path.
 **It is recommended to compile your PGF with the gf flag `--optimize-pgf`**, otherwise this tool can be very slow.
 For example, `gf -make --optimize-pgf FoodsEng.gf FoodsGer.gf`.
 
-You can give the grammar with or without `.pgf`. 
+You can give the grammar with or without `.pgf`.
 
 Without a concrete syntax you can't do much, but you can see the
 available categories and functions with `--show-cats` and `--show-funs`
@@ -139,9 +139,9 @@ Examples:
 * `gftest -g Phrasebook -l Swe --show-cats`  
 * `gftest -g Foods -l "Spa Eng" -f Pizza`
 
-### Function(s) to test: `-f` 
+### Function(s) to test: `-f`
 
-Given a grammar (`-g`) and a concrete language ( `-l`), test a function or several functions. 
+Given a grammar (`-g`) and a concrete language ( `-l`), test a function or several functions.
 
 Examples:
 
@@ -168,7 +168,7 @@ lines. You may not want to do this for big grammars.)
 
 Give a start category for contexts. Used in conjunction with `-f`,
 `-c`, `-t` or `--count-trees`. If not specified, contexts are created
-for the start category of the grammar. 
+for the start category of the grammar.
 
 Example:
 
@@ -219,9 +219,9 @@ writes the differences into files.
 Example:
 
 ```
-> gftest -g TestLang -l Eng -o TestLangOld 
+> gftest -g TestLang -l Eng -o TestLangOld
 Created file TestLangEng-ccat-diff.org
-Testing functions in… 
+Testing functions in…
 <categories flashing by>
 Created file TestLangEng-lin-diff.org
 Created files TestLangEng-(old|new)-funs.org
@@ -295,7 +295,7 @@ which gives the answer `==> CleftAdv, CleftNP, DefArt, ImpersCl, it_Pron`
 Writes the results into a file of format `<GRAMMAR>_<FUN or CAT>.org`,
 e.g. TestLangEng-UseN.org. Recommended to open it in emacs org-mode,
 so you get an overview, and you can maybe ignore some trees if you
-think they are redundant. 
+think they are redundant.
 
 1) When you open the file, you see a list of generated test cases, like this: ![Instructions how to use org mode](https://raw.githubusercontent.com/inariksit/GF-testing/master/doc/instruction-1.png)  
 Place cursor to the left and click tab to open it.
@@ -383,7 +383,7 @@ leaner parameter type, e.g. `param RClAgr = SgAgr <everything incl. gender> | Pl
 
 These fields are not empty, but they are never used in the top
 category. The top category can be specified by `-s`, otherwise it is
-the default start category of the grammar. 
+the default start category of the grammar.
 
 Note that if you give a start category from very low, such as `Adv`,
 you get a whole lot of categories and fields that naturally have no
@@ -552,7 +552,7 @@ couple of examples from the highest size. Examples:
 ```
 > gftest -g TestLang -l Eng --count-trees 10
 There are 675312 trees up to size 10, and 624512 of exactly size 10.
-For example: 
+For example:
 * AdvS today_Adv (UseCl (TTAnt TPres ASimul) PPos (ExistNP (UsePron i_Pron)))
 * UseCl (TTAnt TCond AAnter) PNeg (PredVP (SelfNP (UsePron they_Pron)) UseCopula)
 ```
@@ -563,7 +563,7 @@ specify a category:
 ```
 > gftest -g TestLang -l Eng --count-trees 4 -s Adv
 There are 2409 trees up to size 4, and 2163 of exactly size 4.
-For example: 
+For example:
 * AdAdv very_AdA (PositAdvAdj young_A)
 * PrepNP above_Prep (UsePron they_Pron)
 ```
