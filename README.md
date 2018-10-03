@@ -16,7 +16,7 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 ## Table of Contents
 
 - [Installation](#installation)
-  - [Prerequisites](#prerequisites)
+  - [Prerequisites](#prerequisites-no-stack)
   - [Install gftest](#install-gftest)
 - [Common use cases](#common-use-cases)
   - [Grammar: `-g`](#grammar--g)
@@ -43,11 +43,17 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 
 ## Installation
 
-### Prerequisites
+If you use [stack](https://docs.haskellstack.org/en/stable/README/), all you need to install `gftest` is:
+
+1. Clone this repository `git clone https://github.com/GrammaticalFramework/gftest.git`
+1. In the root directory (*gftest*), type `stack install`.
+
+If you don't use stack, you need to install a few dependencies first, in which case, read on. **Stack users may skip to [Common use cases](#common-use-cases).**
+
+### Prerequisites (no stack)
 
 #### Compact form
 Check out instructions in this [Travis file](https://github.com/GrammaticalFramework/gftest/blob/master/.travis.yml#L7-L16).
-
 
 #### Verbose form
 You need the library `PGF2`, which in turn needs the C runtime for GF. Here are instructions how to install:
@@ -72,8 +78,7 @@ If you get **problems**, try the following:
 ### Install gftest
 
 Clone this repository `git clone https://github.com/GrammaticalFramework/gftest.git`.
-In the root directory (`gftest`), do `cabal install`, or alternatively `stack install`.
-This creates an executable `gftest`.
+In the root directory (`gftest`), type `cabal install`. This creates an executable `gftest`.
 
 ## Common use cases
 
