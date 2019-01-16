@@ -16,7 +16,7 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
 ## Table of Contents
 
 - [Installation](#installation)
-  - [Prerequisites](#prerequisites-no-stack)
+  - [Prerequisites](#prerequisites)
   - [Install gftest](#install-gftest)
 - [Common use cases](#common-use-cases)
   - [Grammar: `-g`](#grammar--g)
@@ -32,7 +32,7 @@ For example, `gf -make --optimize-pgf LangEng.gf`.
   - [Empty or always identical fields: `-e`, `-q`](#empty-or-always-identical-fields--e--q)
   - [Unused fields: `-u`](#unused-fields--u)
   - [Erased trees: `-r`](#erased-trees--r)
-  - [Debug information: `-d`](#debug-intormation--d)
+  - [Debug information: `-d`](#debug-information--d)
 - [Detailed information about the grammar](#detailed-information-about-the-grammar)
   - [--show-cats](#--show-cats)
   - [--show-funs](#--show-funs)
@@ -92,7 +92,8 @@ Common flags:
      --show-funs           Show all available functions
      --funs-of-arity=2     Show all functions of arity 2
      --show-coercions      Show coercions in the grammar
-     --show-contexts=8410  Show contexts for a given concrete type (given as FId)
+     --show-contexts=8140  Show contexts for a given concrete type or a range
+                           of concrete types (given as FIds)
      --concr-string=the    Show all functions that include given string
   -q --equal-fields        Show fields whose strings are always identical
   -e --empty-fields        Show fields whose strings are always empty
@@ -102,8 +103,10 @@ Common flags:
      --only-changed-cats   When comparing against an earlier version of a
                            grammar, only test functions in categories that have
                            changed between versions
+     --only-lexicon        When comparing against an earlier version of a
+                           grammar, only test lexical categories
   -b --treebank=ITEM       Path to a treebank
-     --count-trees=3       Number of trees of depth <depth>
+     --count-trees=3       Number of trees of size <3>
   -d --debug               Show debug output
   -w --write-to-file       Write the results in a file (<GRAMMAR>_<FUN>.org)
   -? --help                Display help message
@@ -259,7 +262,8 @@ trees that have different linearisations in the following format.
 #### Additional arguments to `-o`
 
 The default mode is to test all functions, but you can also give any
-combination of `-s`, `-f`, `-c`, `--treebank`/`-b` and `--only-changed-cats`.
+combination of `-s`, `-f`, `-c`, `--treebank`/`-b`, `--only-changed-cats` 
+and `--only-lexicon`.
 
 With `-s`, you can change the start category in which contexts are
 generated.
@@ -271,12 +275,21 @@ With `-b FILEPATH` (`-b`=`--treebank`), it tests only the trees in the file.
 With `--only-changed-cats`, it only test functions in those categories
 that have changed between the two versions.
 
+With `--only-lexicon`, it only tests functions that don't take arguments. 
+This mostly corresponds to lexical categories (but not always: it will 
+also catch e.g. [hungry_VP](https://github.com/GrammaticalFramework/gf-rgl/blob/master/src/abstract/Construction.gf#L18-L23) in Construction).
+
+Note that this is pretty much overkill when you only want to test lexicon.
+For big grammars, even this takes a long time, so you might want to try 
+easier alternatives, if lexicon is the only thing you need to test.
+
 Examples:
 
-* `gftest -g TestLang -l Eng -o TestLangOld` tests all functions
-* `gftest -g TestLang -l Eng -o TestLangOld -s S` tests all functions in start category S
-* `gftest -g TestLang -l Eng -o TestLangOld --only-changed-cats` tests only changed categories. If no categories have changed (and no other arguments specified), tests everything.
-* `gftest -g TestLang -l Eng -o TestLangOld -f "AdjCN AdvCN" -c Adv -b trees.txt` tests functions, `AdjCN` and `AdvCN`; same for all functions that produce an `Adv`, and all trees in trees.txt.
+* `gftest -g TestLang -l Eng -o old/TestLang` tests all functions
+* `gftest -g TestLang -l Eng -o old/TestLang -s S` tests all functions in start category S
+* `gftest -g TestLang -l Eng -o old/TestLang --only-changed-cats` tests only changed categories. If no categories have changed (and no other arguments specified), tests everything.
+* `gftest -g TestLang -l Eng -o old/TestLang -f "AdjCN AdvCN" -c Adv -b trees.txt` tests functions, `AdjCN` and `AdvCN`; same for all functions that produce an `Adv`, and all trees in trees.txt.
+* `gftest -g TestLang -l Eng -o old/TestLang --only-lexicon` tests only functions without arguments (a good proxy for lexical functions).
 
 ### Information about a particular string: `--concr-string`
 
