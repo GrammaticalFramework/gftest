@@ -63,8 +63,8 @@ data ConcrCat = CC (Maybe Cat) I.FId -- i.e. Int
   deriving ( Eq )
 
 instance Show ConcrCat where
-  show (CC (Just cat) fid) = cat ++ "_" ++ show fid 
-  show (CC Nothing    fid) = "_" ++ show fid 
+  show (CC (Just cat) fid) = cat ++ "_" ++ show fid
+  show (CC Nothing    fid) = "_" ++ show fid
 
 instance Ord ConcrCat where
   (CC _ fid1) `compare` (CC _ fid2) = fid1 `compare` fid2
@@ -99,7 +99,7 @@ showTree (App f xs) = unwords (show f : map showTreeArg xs)
         showTreeArg t = "(" ++ showTree t ++ ")"
 
 subTree :: Symbol -> Tree -> Maybe Tree
-subTree symb t@(App tp tr) 
+subTree symb t@(App tp tr)
   | symb==tp  = Just t
   | otherwise = listToMaybe $ mapMaybe (subTree symb) tr
 
@@ -135,7 +135,7 @@ showConcrFun gr detCN = show detCN ++ " : " ++ args ++ show np_209
 
 type Lang = String
 
-data Grammar 
+data Grammar
   = Grammar
   {
     concrLang    :: Lang
@@ -150,7 +150,7 @@ data Grammar
   , symbols      :: [Symbol]
   , lookupSymbol :: String -> [Symbol]
   , functionsByCat :: Cat -> [Symbol]
-  , concrSeqs    :: SeqId -> [Either String (Int,Int)] 
+  , concrSeqs    :: SeqId -> [Either String (Int,Int)]
   , feat         :: FEAT
   , nonEmptyCats :: S.Set ConcrCat
   , allCats      :: [ConcrCat]
@@ -182,7 +182,7 @@ toGrammar pgf langName =
         { concrLang = lname
 
         , parse = \s ->
-            case PGF2.parse lang (PGF2.startCat pgf) s of 
+            case PGF2.parse lang (PGF2.startCat pgf) s of
               PGF2.ParseOk es_fs -> map (mkTree gr.fst) es_fs
               PGF2.ParseFailed i s -> error s
               PGF2.ParseIncomplete -> error "Incomplete parse"
@@ -201,20 +201,20 @@ toGrammar pgf langName =
         , startCat =
             mkCat (PGF2.startCat pgf)
 
-        , concrCats = 
+        , concrCats =
             I.concrCategories lang
 
         , symbols =
-            [ Symbol { 
+            [ Symbol {
               name = nm,
               seqs = sqs,
               ctyp = (argsCC, goalCC),
               typ = (map (uncoerceAbsCat gr) argsCC, goalcat)
             }
             | (goalcat,bg,end,_) <- I.concrCategories lang
-            , goalfid <- [bg..end] 
+            , goalfid <- [bg..end]
             , I.PApply funId pargs <- I.concrProductions lang goalfid
-            , let goalCC = CC (Just goalcat) goalfid 
+            , let goalCC = CC (Just goalcat) goalfid
             , let argsCC = [ mkCC argfid | I.PArg _ argfid <- pargs ]
             , let (nm,sqs) = I.concrFunction lang funId ]
 
@@ -230,13 +230,13 @@ toGrammar pgf langName =
             [ ( mkCC cfid, CC Nothing afid )
             | afid <- [0..I.concrTotalCats lang]
             , I.PCoerce cfid <- I.concrProductions lang afid ]
-        
+
         , contextsTab =
             M.fromList
             [ (top, M.fromList (contexts gr top))
             | top <- allCats gr ]
-         
-        , concrSeqs = 
+
+        , concrSeqs =
             map cseq2Either . I.concrSequence lang
 
         , feat =
@@ -248,7 +248,7 @@ toGrammar pgf langName =
             ] ++
             [ c | (cat,coe) <- coercions gr
             , c <- [coe,cat]
-            ]  
+            ]
         , nonEmptyCats = S.fromList
             [ c
             | let -- all functions, organized by result type
@@ -260,7 +260,7 @@ toGrammar pgf langName =
                     [ (coe,[Left cat])
                     | (cat,coe) <- coercions gr
                     ]
-            
+
                   -- all categories, with their dependencies
                   defs =
                     [ if or [ arity f == 0 | Right f <- fs ]
@@ -269,12 +269,12 @@ toGrammar pgf langName =
                     | c <- allCats gr
                     , let -- relevant functions for c
                           fs = fromMaybe [] (M.lookup c funs)
-                    
+
                           -- categories we depend on
                           ys = S.toList $ S.fromList $
                                [ cat | Right f <- fs, cat <- fst (ctyp f) ] ++
                                [ cat | Left cat <- fs ]
-                    
+
                           -- compute if we're empty, given the emptiness of others
                           h bs = or $
                             [ and [ tab M.! a | a <- args ]
@@ -299,7 +299,7 @@ toGrammar pgf langName =
   (lang,lname) = case M.lookup langName (PGF2.languages pgf) of
            Just la -> (la,langName)
            Nothing -> let (defName,defGr) = head $ M.assocs $ PGF2.languages pgf
-                          msg = "no grammar found with name " ++ langName ++ 
+                          msg = "no grammar found with name " ++ langName ++
                                 ", using " ++ defName
                       in trace msg (defGr,defName)
 
@@ -312,11 +312,11 @@ toGrammar pgf langName =
     s = show n
 
   mkExpr (App f xs) =
-    PGF2.mkApp (name f) [ mkExpr x | x <- xs ] 
-     
-  mkCC fid = CC ccat fid 
+    PGF2.mkApp (name f) [ mkExpr x | x <- xs ]
+
+  mkCC fid = CC ccat fid
    where ccat = case [ cat | (cat,bg,end,_) <- I.concrCategories lang
-                           , fid `elem` [bg..end] ] of 
+                           , fid `elem` [bg..end] ] of
                   [] -> Nothing -- means it's coercion
                   xs -> Just $ the xs
 
@@ -348,7 +348,7 @@ mkTree gr = disambTree . ambTree
     case foldTree reduce at of
       App [x] ts -> App x [ disambTree t | t <- ts ]
       App _  _ts -> error "mkTree: invalid tree"
- 
+
   reduce fs as =  -- :: [Symbol] -> [AmbTree] -> AmbTree
     let red = [ symbol | symbol <- fs
               , let argTypes =
@@ -396,7 +396,7 @@ reachableCatsFromTop gr top = [ c | (c,True) <- cs `zip` rs ]
  where
   rs = Mu.mu False defs cs
   cs = S.toList (nonEmptyCats gr)
-  
+
   defs =
     [ if c == top
         then (c, [], \_ -> True)
@@ -439,14 +439,14 @@ reachableFieldsFromTop gr top = cs `zip` rs
                , a == c
                , b `S.member` nonEmptyCats gr
                ]
-          
+
           ys = S.toList $ S.fromList
                [ case f of
                    Right (f,_) -> snd (ctyp f)
                    Left b      -> b
                | f <- fs
                ]
-          
+
           h rs = S.unions
                  [ case f of
                      Right (f,k) -> apply (f,k) (args M.! snd (ctyp f))
@@ -474,7 +474,7 @@ equalFields gr = cs `zip` eqrels
  where
   eqrels = Mu.mu Top defs cs
   cs     = S.toList (nonEmptyCats gr)
-  
+
   defs =
     [ (c, depcats, h)
     | c <- cs
@@ -496,7 +496,7 @@ equalFields gr = cs `zip` eqrels
           -- all the categories c depends on
           depcats = S.toList $ S.fromList $ concat
                [ case f of
-                   Right f  -> fst (ctyp f) -- 1) if c is not a coercion: 
+                   Right f  -> fst (ctyp f) -- 1) if c is not a coercion:
                                             -- all arg cats of the functions with c as goal cat
                    Left cat -> [cat] -- 2) if c is a coercion: just the cats that it uncoerces into
                | f <- fs
@@ -519,7 +519,7 @@ equalFields gr = cs `zip` eqrels
       basic [ concatMap lin (concrSeqs gr sq)
             | sq <- seqs f
             ]
-      where 
+      where
         lin (Left str)    = [ str | not (null str) ]
         lin (Right (i,j)) = [ show i ++ "#" ++ show (rep (eqs !! i) j) ]
 
@@ -534,7 +534,7 @@ contexts gr top =
  where
   pathss = Mu.mu F.nil defs cs
   cs     = S.toList (nonEmptyCats gr)
-  
+
   -- all symbols with at least one argument, and only good arguments
   goodSyms =
     [ f
@@ -543,14 +543,14 @@ contexts gr top =
     , snd (ctyp f) `S.member` nonEmptyCats gr
     , all (`S.member` nonEmptyCats gr) (fst (ctyp f))
     ]
- 
+
   -- definitions table for fixpoint iteration
   fm1 `dif` fm2 =
     [ d | d@(xs,_) <- F.toList fm1, not (fm2 `F.covers` xs) ] `ins` F.nil
-  
+
   fm1 `uni` fm2 =
     F.toList fm1 `ins` fm2
-  
+
   paths `ins` fm =
        foldl collect fm
      . map snd
@@ -587,7 +587,7 @@ contexts gr top =
                , cat == c
                , coe `S.member` nonEmptyCats gr
                ]
-          
+
           -- goal categories for c
           ys = S.toList $ S.fromList $
                [ case f of
@@ -595,10 +595,10 @@ contexts gr top =
                    Left coe    -> coe          -- 2)    (category of the) coercion that uncoerces to c
                | f <- fs
                ]
-               
+
           -- function to give to Mu
           h ps = ([ (apply (f,k) str, (f,k):fis)
-                  | Right (f,k) <- fs 
+                  | Right (f,k) <- fs
                   , (str,fis) <- args M.! snd (ctyp f)
                   ] ++
                   [ q
@@ -614,11 +614,11 @@ contexts gr top =
       S.toList $ S.fromList $
       [ y
       | (sq,i) <- seqs f `zip` [0..]
-      , i `elem` is 
+      , i `elem` is
       , Right (x,y) <- concrSeqs gr sq
       , x == k
       ]
-  
+
   path2context []          x = x
   path2context ((f,i):fis) x =
     App f
@@ -641,7 +641,7 @@ forgets gr top =
  where
   pathss = Mu.muDiff F.nil F.isNil dif uni defs cs
   cs     = S.toList (nonEmptyCats gr)
-  
+
   -- all symbols with at least one argument, and only good arguments
   goodSyms =
     [ f
@@ -650,14 +650,14 @@ forgets gr top =
     , snd (ctyp f) `S.member` nonEmptyCats gr
     , all (`S.member` nonEmptyCats gr) (fst (ctyp f))
     ]
- 
+
   fieldsTab =
     M.fromList $
     [ (b, length (seqs f))
     | f <- symbols gr
     , let (as,b) = ctyp f
     ]
- 
+
   fields a =
     head $
     [ n
@@ -665,14 +665,14 @@ forgets gr top =
     , Just n <- [M.lookup c fieldsTab]
     ] ++
     error (show a ++ " has no function creating it")
- 
+
   -- definitions table for fixpoint iteration
   fm1 `dif` fm2 =
     [ d | d@(xs,_) <- F.toList fm1, not (fm2 `F.covers` xs) ] `ins` F.nil
-  
+
   fm1 `uni` fm2 =
     F.toList fm1 `ins` fm2
-  
+
   paths `ins` fm =
        foldl collect fm
      . map snd
@@ -709,7 +709,7 @@ forgets gr top =
                , cat == c
                , coe `S.member` nonEmptyCats gr
                ]
-          
+
           -- goal categories for c
           ys = S.toList $ S.fromList $
                [ case f of
@@ -719,7 +719,7 @@ forgets gr top =
                ]
 
           h ps = ([ (apply (f,k) str, (f,k):fis)
-                  | Right (f,k) <- fs 
+                  | Right (f,k) <- fs
                   , (str,fis) <- args M.! snd (ctyp f)
                   , length str < fields c
                   ] ++
@@ -742,11 +742,11 @@ forgets gr top =
       used = S.fromList $
              [ y
              | (sq,i) <- seqs f `zip` [0..]
-             , i `notElem` is 
+             , i `notElem` is
              , Right (x,y) <- concrSeqs gr sq
              , x == k
              ]
-  
+
   path2context []          x = x
   path2context ((f,i):fis) x =
     App f
@@ -793,7 +793,7 @@ emptyFields gr = cs `zip` fields
           -- a field in C is empty, if there's some function
           --      f :: A -> B -> C
           -- and it uses only empty fields from A and B.
-          -- we're only looking at a given C at a time, 
+          -- we're only looking at a given C at a time,
 
           h :: [S.Set Int] -> S.Set Int
           h vs = foldr1 S.intersection $ [ apply f emptyfields
@@ -807,15 +807,15 @@ emptyFields gr = cs `zip` fields
             args :: M.Map ConcrCat (S.Set Int) -- empty fields of each category
             args = M.fromList (ys `zip` vs)
     ]
-   where            
+   where
     --apply :: Symbol        -- some f :: A -> B
     --        -> [S.Set Int] -- for each argument type to f, which fields are empty
     --        -> S.Set Int   -- empty fields in B
     apply f empties =
-      S.fromList 
+      S.fromList
       [ i
       | (sq,i) <- seqs f `zip` [0..]
-      , let isEmpty s = case s of 
+      , let isEmpty s = case s of
               Left str    -> str == ""
               Right (k,j) -> j `S.member` (empties !! k)
       , all isEmpty (concrSeqs gr sq)
@@ -856,16 +856,16 @@ mkFEAT gr = catList
   catList' [] _ = (0, error "indexing in an empty sequence")
 
   catList' [c] s =
-    parts $ 
+    parts $
           [ (n, \i -> [App f (h i)])
-          | s > 0 
+          | s > 0
           , f <- symbols gr
           , let (xs,y) = ctyp f
           , y == c
           , let (n,h) = catList xs (s-1)
           ] ++
           [ catList [x] s -- put (s-1) if it doesn't terminate
-          | s > 0 
+          | s > 0
           , (x,y) <- coercions gr
           , y == c
           ]
@@ -911,7 +911,7 @@ mkFEAT gr = catList
 
 -- compare two grammars
 diffCats :: Grammar -> Grammar -> [(Cat,[Int],[String],[String])]
-diffCats gr1 gr2 = 
+diffCats gr1 gr2 =
   [ (acat1,[difFid c1, difFid c2],labels1  \\ labels2,labels2 \\ labels1)
     | c1@(acat1,_i1,_j2,labels1) <- concrCats gr1
     , c2@(acat2,_i2,_j2,labels2) <- concrCats gr2
@@ -928,7 +928,7 @@ diffCats gr1 gr2 =
 hasConcrString :: Grammar -> String -> [Symbol]
 hasConcrString gr str =
   [ symb
-  | symb <- symbols gr 
+  | symb <- symbols gr
   , str `elem` concatMap (lefts . concrSeqs gr) (seqs symb) ]
 
 -- nice printouts
@@ -975,7 +975,7 @@ compareTree debug gr oldgr transgr startcat t =
   ctxs = concat
          [ contextsFor gr sc cat
          | sc <- ccats gr startcat
-         , cat <- cs ] 
+         , cat <- cs ]
   langName gr = concrLang gr ++ "> "
 
 type Result = String
@@ -1051,9 +1051,9 @@ testTree debug gr tgrs t n ctxs = unlines
   , if debug then unlines $ tabularPrint gr t else ""
   , unlines $ concat
        [ [ "** " ++ show m ++ ") " ++ show (ctx (App (hole c) []))
-         , langName gr ++ linearize gr (ctx t) 
+         , langName gr ++ linearize gr (ctx t)
          ] ++
-         [ langName tgr ++ linearize tgr (ctx t) 
+         [ langName tgr ++ linearize tgr (ctx t)
          | tgr <- tgrs ]
        | (ctx,m) <- zip ctxs [1..]
        ]
@@ -1063,7 +1063,7 @@ testTree debug gr tgrs t n ctxs = unlines
   c = snd (ctyp w)
   langName gr = concrLang gr ++ "> "
 
-  tabularPrint gr t = 
+  tabularPrint gr t =
     let cseqs = [ concatMap showCSeq cseq
                 | cseq <- map (concrSeqs gr) (seqs $ top t) ]
         tablins = tabularLin gr t :: [(String,String)]
@@ -1075,16 +1075,16 @@ testTree debug gr tgrs t n ctxs = unlines
 --------------------------------------------------------------------------------
 -- Generate test trees
 
-treesUsingFun :: Grammar -> [Symbol] -> [Tree] 
-treesUsingFun gr detCNs = 
+treesUsingFun :: Grammar -> [Symbol] -> [Tree]
+treesUsingFun gr detCNs =
   [ tree
     | detCN <- detCNs
     , let (dets_cns,np_209) = ctyp detCN -- :: ([ConcrCat],ConcrCat)
     , let bestArgs = case dets_cns of
-                      [] -> [[]] 
-                      xs -> bestTrees detCN gr dets_cns 
+                      [] -> [[]]
+                      xs -> bestTrees detCN gr dets_cns
     , tree <- App detCN `map` bestArgs ]
-  
+
 
 bestTrees :: Symbol -> Grammar -> [ConcrCat] -> [[Tree]]
 bestTrees fun gr cats =
@@ -1092,7 +1092,7 @@ bestTrees fun gr cats =
   [ featIthVec gr cats size i
   | all (`S.member` nonEmptyCats gr) cats
   , size <- [0..20]
-  , let card = featCardVec gr cats size 
+  , let card = featCardVec gr cats size
   , i <- [0..card-1]
   ]
 
@@ -1101,7 +1101,7 @@ xs `subsumes` ys = go (xs `zip` ys)
  where
   go [] =
     True
-    
+
   go ((x,y):xys) =
     and [ y' == y | (x',y') <- xys, x == x' ] &&
     go [ xy | xy@(x',_) <- xys, x /= x' ]

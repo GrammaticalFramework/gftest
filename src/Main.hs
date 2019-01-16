@@ -16,9 +16,8 @@ import qualified System.Console.CmdArgs as A
 import System.FilePath.Posix ( takeFileName )
 import System.IO ( stdout, hSetBuffering, BufferMode(..) )
 
-
-data GfTest 
-  = GfTest 
+data GfTest
+  = GfTest
   { grammar       :: Maybe FilePath
   -- Languages
   , lang          :: Lang
@@ -54,11 +53,11 @@ data GfTest
 
   } deriving (Data,Typeable,Show,Eq)
 
-gftest = GfTest 
+gftest = GfTest
   { grammar       = def &= typFile      &= help "Path to the grammar (PGF) you want to test"
-  , lang          = def &= A.typ "\"Eng Swe\""  
+  , lang          = def &= A.typ "\"Eng Swe\""
                                         &= help "Concrete syntax + optional translations"
-  , tree          = def &= A.typ "\"UseN tree_N\"" 
+  , tree          = def &= A.typ "\"UseN tree_N\""
                         &= A.name "t"   &= help "Test the given tree"
   , function      = def &= A.typ "UseN"
                         &= A.name "f"   &= help "Test the given function(s)"
@@ -89,7 +88,7 @@ gftest = GfTest
 
 
 main :: IO ()
-main = do 
+main = do
  hSetBuffering stdout NoBuffering
 
  args <- cmdArgs gftest
@@ -124,10 +123,10 @@ main = do
                         -- , cat <- cs ]
 
         output = -- Print to stdout or write to a file
-         if write_to_file args 
-           then \x -> 
+         if write_to_file args
+           then \x ->
              do let fname = concat [ langName, "_", function args, category args, ".org" ]
-                writeFile fname x 
+                writeFile fname x
                 putStrLn $ "Wrote results in " ++ fname
            else putStrLn
 
@@ -135,7 +134,7 @@ main = do
         intersectConcrCats cats_fields intersection =
           M.fromListWith intersection
                 ([ (c,fields)
-                | (CC (Just c) _,fields) <- cats_fields 
+                | (CC (Just c) _,fields) <- cats_fields
                 ] ++
                 [ (cat,fields)
                 | (c@(CC Nothing _),fields) <- cats_fields
@@ -143,8 +142,8 @@ main = do
                 , c == coe
                 ])
 
-        printStats tab = 
-          sequence_ [ do putStrLn $ "==> " ++ c ++ ": " 
+        printStats tab =
+          sequence_ [ do putStrLn $ "==> " ++ c ++ ": "
                          putStrLn $ unlines (map (fs!!) xs)
                     | (c,vs) <- M.toList tab
                     , let fs = fieldNames gr c
@@ -172,7 +171,7 @@ main = do
       unlines [ testTree' t n
               | cat <- cats
               , (t,n) <- treesUsingFun gr (functionsByCat gr cat) `zip` [1..]]
-            
+
     -- Test all functions in a category
     let funs = case function args of
          [] -> []
@@ -233,7 +232,7 @@ main = do
         putStrLn $ "* Functions in the grammar of arity " ++ show n ++ ":"
         putStrLn $ unlines $ nub [ show s | s <- symbols gr, arity s == n ]
 
-    -- Show all functions that contain the given string 
+    -- Show all functions that contain the given string
     -- (e.g. English "it" appears in DefArt, ImpersCl, it_Pron, …)
     case concr_string args of
       []  -> return ()
@@ -255,7 +254,7 @@ main = do
              sequence_
                [ do putStrLn ("- Tree:  " ++ showTree t)
                     putStrLn ("- Lin:   " ++ s)
-                    putStrLn $ unlines 
+                    putStrLn $ unlines
                       [ "- Trans: "++linearize tgr t
                       | tgr <- grTrans ]
                | t <- ts
@@ -264,7 +263,7 @@ main = do
                ]
         | top <- take 1 $ ccats gr startcat
         , (c,ts) <- forgets gr top
-        , let erasedTrees = 
+        , let erasedTrees =
                 concat [ [ showTree subtree
                          | sym <- flatten t
                          , let csym = snd (ctyp sym)
@@ -277,7 +276,7 @@ main = do
     -- Show unused fields
     when (unused_fields args) $ do
 
-      let unused = 
+      let unused =
            [ (c,S.fromList notUsed)
            | tp <- ccats gr startcat
            , (c,is) <- reachableFieldsFromTop gr tp
@@ -341,7 +340,7 @@ main = do
         oldgr <- readGrammar langName (stripPGF fp ++ ".pgf")
         let ogr = oldgr { concrLang = concrLang oldgr ++ "-OLD" }
             difcats = diffCats ogr gr -- (acat, [#o, #n], olabels, nlabels)
- 
+
         --------------------------------------------------------------------------
         -- generate statistics of the changes in the concrete categories
         let ccatChangeFile = langName ++ "-ccat-diff.org"
@@ -355,10 +354,10 @@ main = do
              , intercalate ", " ol
              , "** Labels only in new (" ++ show (length nl) ++ "):"
              , intercalate ", " nl ]
-          | (acat, [o,n], ol, nl) <- difcats ] 
-        when (debug args) $ 
+          | (acat, [o,n], ol, nl) <- difcats ]
+        when (debug args) $
           sequence_
-            [ appendFile ccatChangeFile $ 
+            [ appendFile ccatChangeFile $
               unlines $
                 ("* All concrete cats in the "++age++" grammar:"):
                 [ show cts | cts <- concrCats g ]
@@ -410,9 +409,9 @@ main = do
 
               let shorterTree c1 c2 = length (funTree c1) `compare` length (funTree c2)
               writeFile file $ unlines
-                [ show comp 
+                [ show comp
                 | comp <- sortBy shorterTree diff ]
-            
+
         writeLinFile (langName ++ "-lin-diff.org") gr ogr
         putStrLn $ "Created file " ++ (langName ++ "-lin-diff.org")
 
@@ -456,4 +455,3 @@ main = do
   stripPGF s = case reverse s of
                 'f':'g':'p':'.':name -> reverse name
                 name                 -> s
-
