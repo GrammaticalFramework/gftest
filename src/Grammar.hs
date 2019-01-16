@@ -946,19 +946,26 @@ showLinTree :: LinTree -> String
 showLinTree ((an,hl),(l1,t1),(l2,t2),(_l,[])) = unlines ["", an++hl, l1++t1, l2++t2]
 showLinTree ((an,hl),(l1,t1),(l2,t2),(l3,t3)) = unlines ["", an++hl, l1++t1, l2++t2, l3++t3]
 
-compareTree :: Grammar -> Grammar -> [Grammar] -> Cat -> Tree -> Comparison
-compareTree gr oldgr transgr startcat t = Comparison {
-  funTree = "* " ++ show t
-, linTree = [ ( ("** ",hl), (langName gr,newLin), (langName oldgr, oldLin), transLin )
-            | ctx <- ctxs
-            , let hl = show (ctx dummyHole)
-            , let newLin = linearize gr (ctx t)
-            , let oldLin = linearize oldgr (ctx t)
-            , let transLin = case transgr of
-                              []  -> ("","")
-                              g:_ -> (langName g, linearize g (ctx t))
-            , newLin /= oldLin
-            ] }
+compareTree :: Bool -> Grammar -> Grammar -> [Grammar] -> Cat -> Tree -> Comparison
+compareTree debug gr oldgr transgr startcat t =
+ let f = if debug
+          then trace (show t)
+          else id
+  in f $ Comparison {
+            funTree = "* " ++ show t
+          , linTree = [ ( ("** ",hl),
+                          (langName gr,newLin),
+                          (langName oldgr, oldLin),
+                          transLin )
+                      | ctx <- ctxs
+                      , let hl = show (ctx dummyHole)
+                      , let newLin = linearize gr (ctx t)
+                      , let oldLin = linearize oldgr (ctx t)
+                      , let transLin = case transgr of
+                                        []  -> ("","")
+                                        g:_ -> (langName g, linearize g (ctx t))
+                      , newLin /= oldLin
+                      ] }
  where
   w    = top t
   c    = snd (ctyp w)

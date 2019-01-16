@@ -44,6 +44,7 @@ data GfTest
   -- Compare to old grammar
   , old_grammar   :: Maybe FilePath
   , only_changed_cats :: Bool
+  , only_lexicon :: Bool
 
  -- Misc
   , treebank      :: Maybe FilePath
@@ -82,6 +83,7 @@ gftest = GfTest
   , old_grammar   = def &= typFile
                         &= A.name "o"   &= help "Path to an earlier version of the grammar"
   , only_changed_cats = def             &= help "When comparing against an earlier version of a grammar, only test functions in categories that have changed between versions"
+  , only_lexicon      = def             &= help "When comparing against an earlier version of a grammar, only test lexical categories"
   , write_to_file = def                 &= help "Write the results in a file (<GRAMMAR>_<FUN>.org)"
   }
 
@@ -365,7 +367,9 @@ main = do
         putStrLn $ "Created file " ++ ccatChangeFile
 
       --------------------------------------------------------------------------
-      -- Print out tests for all functions in the changed cats.
+      -- Print out tests for all functions:
+      -- If --only-changed-cats given, test only the changed cats.
+      -- If --only-lexicon given, test only lexical functions.
       -- If -f, -c or --treebank specified, use them.
 
         let f cat = (cat, treesUsingFun gr $ functionsByCat gr cat)
@@ -373,6 +377,11 @@ main = do
             byCat   = [ f cat | cat <- cats ] -- from command line arg -c
             changed = [ f cat | (cat,_,_,_) <- difcats
                       , only_changed_cats args ]
+            lexical = [ (cat, treesUsingFun gr [s])
+                      | s <- symbols gr
+                      , only_lexicon args -- the flag --only-lexicon was given
+                      , arity s == 0  -- is a lexical category
+                      , let cat = snd $ Grammar.typ s ]
             byFun   = [ (cat, treesUsingFun gr fs)
                       | funName <- funs -- comes from command line arg -f
                       , let fs@(s:_) = lookupSymbol gr funName
@@ -381,7 +390,7 @@ main = do
                       , let (CC (Just cat) _) = ccatOf tree ]
 
             treesToTest =
-              case concat [byFun, byCat, changed, fromTb] of
+              case concat [byFun, byCat, changed, fromTb, lexical] of
                 [] -> [ f cat  -- nothing else specified -> test all functions
                       | (cat,_,_,_) <- concrCats gr ]
                 xs -> S.toList $ S.fromList xs
@@ -389,8 +398,8 @@ main = do
             writeLinFile file grammar otherGrammar = do
               writeFile file ""
               putStrLn "Testing functions in… "
-              diff <- concat `fmap`
-                sequence [ do let cs = [ compareTree grammar otherGrammar grTrans startcat t
+              diff <- concat `fmap`                  -- print every item
+                sequence [ do let cs = [ compareTree (only_lexicon args) grammar otherGrammar grTrans startcat t
                                        | t <- ttrees ]
                               putStr $ cat ++ "                \r"
                               -- prevent lazy evaluation; make printout accurate
