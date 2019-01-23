@@ -218,8 +218,9 @@ main = do
 
     -- Show available functions
     when (show_funs args) $ do
+      let printfun = if (debug args) then showConcrFun gr else show
       putStrLn "* Functions in the grammar:"
-      putStrLn $ unlines $ nub [ show s | s <- symbols gr ]
+      putStrLn $ unlines $ nub [ printfun s | s <- symbols gr ]
 
     -- Show coercions in the grammar
     when (show_coercions args) $ do
