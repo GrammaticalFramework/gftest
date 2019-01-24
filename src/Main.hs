@@ -212,14 +212,16 @@ main = do
                          [ "categories " ++ show bg++"—"++show end
                          | bg/=end ] ++
                          [ "category   " ++ show bg
-                         | bg==end ]
-                | (cat,bg,end,_) <- concrcats
+                         | bg==end ] ++
+                         [ "\n\t\t\t\t    " ++ show (1 + (end-bg)) ++ " categories with " ++ (show $ length lbls) ++ " labels" ]
+                | (cat,bg,end,lbls) <- concrcats
                 , end >= 0]
 
     -- Show available functions
     when (show_funs args) $ do
+      let printfun = if (debug args) then showConcrFun gr else show
       putStrLn "* Functions in the grammar:"
-      putStrLn $ unlines $ nub [ show s | s <- symbols gr ]
+      putStrLn $ unlines $ nub [ printfun s | s <- symbols gr ]
 
     -- Show coercions in the grammar
     when (show_coercions args) $ do
@@ -230,7 +232,11 @@ main = do
       Nothing -> return ()
       Just n -> do
         putStrLn $ "* Functions in the grammar of arity " ++ show n ++ ":"
-        putStrLn $ unlines $ nub [ show s | s <- symbols gr, arity s == n ]
+        putStrLn $ unlines $
+         if (debug args)
+           then [ showConcrFun gr s | s <- symbols gr, arity s == n ]
+           else nub [ show s | s <- symbols gr, arity s == n ]
+
 
     -- Show all functions that contain the given string
     -- (e.g. English "it" appears in DefArt, ImpersCl, it_Pron, …)
