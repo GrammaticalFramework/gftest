@@ -162,11 +162,15 @@ main = do
     let substrs xs = filter (/="*") $ groupBy (\a b -> a/='*' && b/='*') xs
     let cats = case category args of
          [] -> []
-         cs -> if '*' `elem` cs
-                then let subs = substrs cs
-                      in nub [ cat | (cat,_,_,_) <- concrCats gr
-                             , all (`isInfixOf` cat) subs ]
-                else words cs
+         cs -> let cs' =
+                    if '*' `elem` cs
+                    then let subs = substrs cs
+                          in nub [ cat | (cat,_,_,_) <- concrCats gr
+                                 , all (`isInfixOf` cat) subs ]
+                    else words cs
+                in case old_grammar args of
+                     Nothing -> cs'
+                     Just _  -> [] -- if -c is given with -o, don't print out everything
     output $
       unlines [ testTree' t n
               | cat <- cats
