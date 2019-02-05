@@ -990,13 +990,13 @@ testFun debug gr trans startcat funname =
   testcase_ctxs = M.toList $ M.fromListWith (++) $ uniqueTCs++commonTCs
 
   uniqueTCs = [ (testcase,uniqueCtxs)
-   | (cat,(testcase,ctxs)) <- M.toList cat_testcase_ctxs
+   | (cat,(testcase,ctxs)) <- cat_testcase_ctxs
    , let uniqueCtxs = deleteFirstsBy applyHole ctxs (commonCtxs cat)
    , not $ null uniqueCtxs
    ]
   commonTCs = [ (App newTop subtrees,ctxs)
    | (coe,cats,ctxs) <- coercion_goalcats_commonCtxs
-   , let testcases_ctxs = catMaybes [ M.lookup cat cat_testcase_ctxs
+   , let testcases_ctxs = catMaybes [ lookup cat cat_testcase_ctxs
                                     | cat <- cats ]
    , not $ null testcases_ctxs
    , let fstLen (a,_) (b,_) = length (flatten a) `compare` length (flatten b)
@@ -1016,14 +1016,14 @@ testFun debug gr trans startcat funname =
            [] -> error $ "Function "++funname++" not found"
            fs -> fs
 
-  cat_testcase_ctxs = M.fromList
+  cat_testcase_ctxs =
     [ (goalcat,(testcase,ctxs))
     | testcase <- treesUsingFun gr funs
     , let goalcat = ccatOf testcase -- never a coercion (coercions can't be goals)
     , let ctxs = [ ctx | st <- starts
                  , ctx <- contextsFor gr st goalcat ]
-    ] :: M.Map ConcrCat (Tree,[Tree->Tree])
-  goalcats = M.keys cat_testcase_ctxs
+    ] :: [(ConcrCat, (Tree,[Tree->Tree]))]
+  goalcats = map fst cat_testcase_ctxs
 
   coercion_goalcats_commonCtxs =
     [ (coe,coveredGoalcats,ctxs)
@@ -1035,8 +1035,7 @@ testFun debug gr trans startcat funname =
     , length coveredGoalcats >= 2 -- no use if the coercion covers 0 or 1 categories
     , not $ null ctxs ]
 
-
-  allCtxs = [ ctx | (_,ctxs) <- M.elems cat_testcase_ctxs
+  allCtxs = [ ctx | (_,(_,ctxs)) <- cat_testcase_ctxs
                   , ctx <- ctxs ] :: [Tree->Tree]
 
   commonCtxs cat = nubBy applyHole [ ctx | (_,cats,ctxs) <- coercion_goalcats_commonCtxs
