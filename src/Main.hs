@@ -162,18 +162,17 @@ main = do
     let substrs xs = filter (/="*") $ groupBy (\a b -> a/='*' && b/='*') xs
     let cats = case category args of
          [] -> []
-         cs -> let cs' =
-                    if '*' `elem` cs
-                    then let subs = substrs cs
-                          in nub [ cat | (cat,_,_,_) <- concrCats gr
-                                 , all (`isInfixOf` cat) subs ]
-                    else words cs
-                in case old_grammar args of
-                     Nothing -> cs'
-                     Just _  -> [] -- if -c is given with -o, don't print out everything
+         cs -> if '*' `elem` cs
+                then let subs = substrs cs
+                      in nub [ cat | (cat,_,_,_) <- concrCats gr
+                             , all (`isInfixOf` cat) subs ]
+                else words cs
+
     output $
       unlines [ testTree' t n
-              | cat <- cats
+              | cat <- case old_grammar args of
+                         Nothing -> cats
+                         Just _  -> [] -- if -c is given with -o, don't print out everything
               , (t,n) <- treesUsingFun gr (functionsByCat gr cat) `zip` [1..]]
 
     -- Test all functions in a category
@@ -187,7 +186,10 @@ main = do
                  else words fs
     output $
       unlines [ testFun (debug args) gr grTrans startcat f
-              | f <- funs ]
+              | f <- case old_grammar args of
+                       Nothing -> funs
+                       Just _  -> [] -- if -f is given with -o, don't print out everything
+              ]
 
 -----------------------------------------------------------------------------
 -- Information about the grammar
