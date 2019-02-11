@@ -351,29 +351,43 @@ main = do
       Just fp -> do
         oldgr <- readGrammar langName (stripPGF fp ++ ".pgf")
         let ogr = oldgr { concrLang = concrLang oldgr ++ "-OLD" }
-            difcats = diffCats ogr gr -- (acat, [#o, #n], olabels, nlabels)
+            ngr = gr { concrLang = concrLang gr ++ "-NEW" }
+            difcats = diffCats ogr ngr -- (acat, [#o, #n], olabels, nlabels)
 
         --------------------------------------------------------------------------
         -- generate statistics of the changes in the concrete categories
         let ccatChangeFile = langName ++ "-ccat-diff.org"
         writeFile ccatChangeFile ""
-        sequence_
-          [ appendFile ccatChangeFile $ unlines
-             [ "* " ++ acat
-             , show o ++ " concrete categories in the old grammar,"
-             , show n ++ " concrete categories in the new grammar."
-             , "** Labels only in old (" ++ show (length ol) ++ "):"
-             , intercalate ", " ol
-             , "** Labels only in new (" ++ show (length nl) ++ "):"
-             , intercalate ", " nl ]
-          | (acat, [o,n], ol, nl) <- difcats ]
+        appendFile ccatChangeFile $ unlines
+          ["* Concrete categories"
+           , ""
+           , unlines [ unlines [ "** " ++ acat
+               , show o ++ " concr cats in " ++ concrLang ogr
+               , show n ++ " concr cats in " ++ concrLang ngr
+               , "*** Labels only in old (" ++ show (length ol) ++ "):"
+               , intercalate ", " ol
+               , "*** Labels only in new (" ++ show (length nl) ++ "):"
+               , intercalate ", " nl ]
+               | (acat, [o,n], ol, nl) <- difcats ]
+          , "* Concrete functions"
+          , ""
+          , unlines [ unlines [ "** " ++ funName
+               , show (length fsOld) ++ " concr funs in " ++ concrLang ogr
+               , show (length fsNew) ++ " concr funs in " ++ concrLang ngr ]
+               -- This is awkward: first I want to just get the names, then compare how many they are
+               | funName <- S.toList $ S.fromList $ map show (symbols gr)
+               , let fsNew@(f:_) = lookupSymbol ngr funName
+               , let fsOld = lookupSymbol ogr funName
+               , length fsNew /= length fsOld
+               , arity f >= 1 ]
+             ]
         when (debug args) $
           sequence_
             [ appendFile ccatChangeFile $
               unlines $
                 ("* All concrete cats in the "++age++" grammar:"):
                 [ show cts | cts <- concrCats g ]
-            | (g,age) <- [(ogr,"old"),(gr,"new")] ]
+            | (g,age) <- [(ogr,"old"),(ngr,"new")] ]
 
         putStrLn $ "Created file " ++ ccatChangeFile
 
