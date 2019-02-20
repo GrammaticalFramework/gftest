@@ -438,7 +438,7 @@ main = do
                 [ show comp
                 | comp <- sortBy shorterTree diff ]
 
-        writeLinFile (langName ++ "-lin-diff.org") gr ogr
+        writeLinFile (langName ++ "-lin-diff.org") ngr ogr
         putStrLn $ "Created file " ++ (langName ++ "-lin-diff.org")
 
         ---------------------------------------------------------------------------
@@ -462,7 +462,7 @@ main = do
                         | funs <- groupedFuns ]
 
         writeFunFile (groupFuns ogr) (langName ++ "-old-funs.org") ogr
-        writeFunFile (groupFuns gr)  (langName ++ "-new-funs.org") gr
+        writeFunFile (groupFuns ngr)  (langName ++ "-new-funs.org") ngr
 
         putStrLn $ "Created files " ++ langName ++ "-(old|new)-funs.org"
 
