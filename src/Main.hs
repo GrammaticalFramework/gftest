@@ -121,15 +121,11 @@ main = do
           ctxs = concat [ contextsFor gr sc c
                         | sc <- ccats gr startcat ]
                         -- , cat <- cs ]
-
+        fname = concat [ langName, "_", function args, category args, ".org" ]
         output = -- Print to stdout or write to a file
          if write_to_file args
-           then \x ->
-             do let fname = concat [ langName, "_", function args, category args, ".org" ]
-                writeFile fname x
-                putStrLn $ "Wrote results in " ++ fname
+           then \x -> appendFile fname (x++"\n")
            else putStrLn
-
 
         intersectConcrCats cats_fields intersection =
           M.fromListWith intersection
@@ -143,8 +139,8 @@ main = do
                 ])
 
         printStats tab =
-          sequence_ [ do putStrLn $ "==> " ++ c ++ ": "
-                         putStrLn $ unlines (map (fs!!) xs)
+          sequence_ [ do output $ "==> " ++ c ++ ": "
+                         output $ unlines (map (fs!!) xs)
                     | (c,vs) <- M.toList tab
                     , let fs = fieldNames gr c
                     , xs@(_:_) <- [ S.toList vs ] ]
@@ -209,11 +205,11 @@ main = do
 
     -- Show available categories
     when (show_cats args) $ do
-      putStrLn "* Categories in the grammar:"
+      output "* Categories in the grammar:"
       let concrcats = sortBy (\(_,a,_,_) (_,b,_,_) -> a `compare` b) (concrCats gr)
-      sequence_ [ do putStrLn cat
+      sequence_ [ do output cat
                      when (debug args) $
-                       putStrLn $ unwords $
+                       output $ unwords $
                          [ "    Compiles to concrete" ] ++
                          [ "categories " ++ show bg++"—"++show end
                          | bg/=end ] ++
@@ -226,19 +222,20 @@ main = do
     -- Show available functions
     when (show_funs args) $ do
       let printfun = if (debug args) then showConcrFun gr else show
-      putStrLn "* Functions in the grammar:"
-      putStrLn $ unlines $ nub [ printfun s | s <- symbols gr ]
+      output "* Functions in the grammar:"
+      output $ unlines $ nub [ printfun s | s <- symbols gr ]
 
     -- Show coercions in the grammar
     when (show_coercions args) $ do
-      putStrLn "* Coercions in the grammar:"
-      putStrLn $ unlines [ show cat++"--->"++show coe | (cat,coe) <- coercions gr ]
+      output $ unlines
+        ("* Coercions in the grammar:"
+         : [ show cat++"--->"++show coe | (cat,coe) <- coercions gr ])
 
     case funs_of_arity args of
       Nothing -> return ()
       Just n -> do
-        putStrLn $ "* Functions in the grammar of arity " ++ show n ++ ":"
-        putStrLn $ unlines $
+        output $ "* Functions in the grammar of arity " ++ show n ++ ":"
+        output $ unlines $
          if (debug args)
            then [ showConcrFun gr s | s <- symbols gr, arity s == n ]
            else nub [ show s | s <- symbols gr, arity s == n ]
@@ -248,25 +245,24 @@ main = do
     -- (e.g. English "it" appears in DefArt, ImpersCl, it_Pron, …)
     case concr_string args of
       []  -> return ()
-      str -> do putStrLn $ "### The following functions contain the string '" ++ str ++ "':"
-                putStr "==> "
-                putStrLn $ intercalate ", " $ nub [ name s | s <- hasConcrString gr str]
+      str -> do output $ "### The following functions contain the string '" ++ str ++ "':"
+                output $ "==> " ++ (intercalate ", " $ nub [ name s | s <- hasConcrString gr str])
 
     -- Show empty fields
     when (empty_fields args) $ do
-      putStrLn "### Empty fields:"
+      output "### Empty fields:"
       printStats $ intersectConcrCats (emptyFields gr) S.intersection
-      putStrLn ""
+      output ""
 
     -- Show erased trees
     when (erased_trees args) $ do
-      putStrLn "* Erased trees:"
+      output "* Erased trees:"
       sequence_
-        [ do putStrLn ("** " ++ intercalate "," erasedTrees ++ " : " ++ uncoerceAbsCat gr c)
+        [ do output ("** " ++ intercalate "," erasedTrees ++ " : " ++ uncoerceAbsCat gr c)
              sequence_
-               [ do putStrLn ("- Tree:  " ++ showTree t)
-                    putStrLn ("- Lin:   " ++ s)
-                    putStrLn $ unlines
+               [ do output ("- Tree:  " ++ showTree t)
+                    output ("- Lin:   " ++ s)
+                    output $ unlines
                       [ "- Trans: "++linearize tgr t
                       | tgr <- grTrans ]
                | t <- ts
@@ -283,7 +279,7 @@ main = do
                          , let Just subtree = subTree sym t ]
                        | t <- ts ]
         ]
-      putStrLn ""
+      output ""
 
     -- Show unused fields
     when (unused_fields args) $ do
@@ -301,16 +297,16 @@ main = do
                  notUsed = [ i | i <- [0..ar-1], i `notElem` (S.toList is) ]
            , not (null notUsed)
            ]
-      putStrLn "### Unused fields:"
+      output "### Unused fields:"
       printStats $ intersectConcrCats unused S.intersection
-      putStrLn ""
+      output ""
 
     -- Show equal fields
     let tab = intersectConcrCats (equalFields gr) (/\)
     when (equal_fields args) $ do
-      putStrLn "### Equal fields:"
+      output "### Equal fields:"
       sequence_
-       [ putStrLn ("==> " ++ c ++ ":\n" ++ cl)
+       [ output ("==> " ++ c ++ ":\n" ++ cl)
        | (c,eqr) <- M.toList tab
        , let fs = fieldNames gr c
        , cl <- case eqr of
@@ -318,17 +314,17 @@ main = do
                  Classes xss -> [ unlines (map (fs!!) xs)
                                 | xs@(_:_:_) <- xss ]
        ]
-      putStrLn ""
+      output ""
 
     case count_trees args of
       Nothing -> return ()
       Just n  -> do let start = head $ ccats gr startcat
                     let i = featCard gr start n
                     let iTot = sum [ featCard gr start m | m <- [1..n] ]
-                    putStr   $ "There are "++show iTot++" trees up to size "++show n
-                    putStrLn $ ", and "++show i++" of exactly size "++show n++".\nFor example: "
-                    putStrLn $ "* " ++ show (featIth gr start n 0)
-                    putStrLn $ "* " ++ show (featIth gr start n (i-1))
+                    output $ "There are "++show iTot++" trees up to size "++show n ++
+                             ", and "++show i++" of exactly size "++show n++".\nFor example: "
+                    output $ "* " ++ show (featIth gr start n 0)
+                    output $ "* " ++ show (featIth gr start n (i-1))
 
 
 -------------------------------------------------------------------------------
@@ -466,6 +462,10 @@ main = do
 
         putStrLn $ "Created files " ++ langName ++ "-(old|new)-funs.org"
 
+--------------------------------------------------------------------------------
+-- Finally, if we wrote results into a file, output the filename into stdout.
+
+    when (write_to_file args) $ putStrLn $ "Wrote results in " ++ fname
 
  where
 
