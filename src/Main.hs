@@ -287,13 +287,8 @@ main = do
       let unused =
            [ (c,S.fromList notUsed)
            | tp <- ccats gr startcat
-           , (c,is) <- reachableFieldsFromTop gr tp
-           , let ar = head $
-                  [ length (seqs f)
-                  | f <- symbols gr, snd (ctyp f) == c ] ++
-                  [ length (seqs f)
-                  | (b,a) <- coercions gr, a == c
-                  , f <- symbols gr, snd (ctyp f) == b ]
+           , (c@(CC (Just cat)_), is) <- reachableFieldsFromTop gr tp
+           , let ar = M.size $ fields gr M.! cat
                  notUsed = [ i | i <- [0..ar-1], i `notElem` (S.toList is) ]
            , not (null notUsed)
            ]
