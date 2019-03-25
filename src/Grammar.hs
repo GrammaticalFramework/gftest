@@ -134,6 +134,9 @@ showConcrFun gr detCN = show detCN ++ " : " ++ args ++ show np_209
 -- grammar
 
 type Lang = String
+type FieldIndex = Int
+type ArgIndex = Int
+type FieldName = String
 
 data Grammar
   = Grammar
@@ -143,6 +146,7 @@ data Grammar
   , readTree     :: String -> Tree
   , linearize    :: Tree -> String
   , tabularLin   :: Tree ->  [(String,String)]
+  , fields       :: M.Map Cat (M.Map FieldIndex FieldName)
   , concrCats    :: [(PGF2.Cat,I.FId,I.FId,[String])]
   , coercions    :: [(ConcrCat,ConcrCat)]
   , contextsTab  :: M.Map ConcrCat (M.Map ConcrCat [Tree -> Tree])
@@ -150,22 +154,14 @@ data Grammar
   , symbols      :: [Symbol]
   , lookupSymbol :: String -> [Symbol]
   , functionsByCat :: Cat -> [Symbol]
-  , concrSeqs    :: SeqId -> [Either String (Int,Int)]
+  , concrSeqs    :: SeqId -> [Either String (ArgIndex,FieldIndex)]
   , feat         :: FEAT
   , nonEmptyCats :: S.Set ConcrCat
   , allCats      :: [ConcrCat]
   }
 
-fieldNames :: Grammar -> Cat -> [String]
-fieldNames gr c = map fst . tabularLin gr $ t
- where
-  t:_ = [ t
-        | f <- functionsByCat gr c
-        , let (_,c') = ctyp f
-        , c' `S.member` nonEmptyCats gr
-        , t <- featAll gr c'
-        ]
-
+fieldNames :: Grammar -> Cat -> [FieldName]
+fieldNames gr c = M.elems $ fields gr M.! c
 
 --------------------------------------------------------------------------------
 -- grammar
@@ -197,6 +193,19 @@ toGrammar pgf langName =
 
         , tabularLin = \t ->
             PGF2.tabularLinearize lang (mkExpr t)
+
+        , fields = M.fromList $
+            [ (cat, M.fromList
+                      [ (i, fn)
+                      | f <- functionsByCat gr cat
+                      , let (_,goalcat@(CC _ fid)) = ctyp f
+                      , goalcat `S.member` nonEmptyCats gr
+                      , let t:_ = featAll gr goalcat -- 1 is enough; only needed to create some tree so we can call tabularLin
+                      , (i, (fn,_) ) <- [0..(length $ seqs f)-1] `zip` tabularLin gr t
+                      ]
+              )
+            | cat <- PGF2.categories pgf
+            ]
 
         , startCat =
             mkCat (PGF2.startCat pgf)
