@@ -1,12 +1,7 @@
 resolver: lts-12.10
 
-packages:
-- .
-# if you want to use your local copy:
-#- location: /Users/inari/work/GF/gf-core/src/runtime/haskell-bind # for PGF2
-- location:
-   github: GrammaticalFramework/gf-core
-   commit: 65cfdf1775dc060f1f85956443db2eb56e1460ce
-   subdirs:
-     - src/runtime/haskell-bind # for PGF2
-  extra-dep: true
+extra-deps:
+  - git: https://github.com/GrammaticalFramework/gf-core.git
+    commit: 65cfdf1775dc060f1f85956443db2eb56e1460ce
+    subdirs:
+      - src/runtime/haskell-bind # for PGF2
