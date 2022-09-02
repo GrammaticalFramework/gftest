@@ -364,34 +364,32 @@ hint for the grammarian to remove it altogether.
 Example of equal fields:
 
 ```
-> gftest -g Lang -l Dut -q
+> gftest -g Lang -l Est -q
 * Equal fields:
-==> RCl:
-s Pres Simul Pos Utr Pl
-s Pres Simul Pos Neutr Pl
-
-==> RCl:
-s Pres Simul Neg Utr Pl
-s Pres Simul Neg Neutr Pl
-
-==> RCl:
-s Pres Anter Pos Utr Pl
-s Pres Anter Pos Neutr Pl
-
-==> RCl:
-s Pres Anter Neg Utr Pl
-s Pres Anter Neg Neutr Pl
-
-==> RCl:
-s Past Simul Pos Utr Pl
-s Past Simul Pos Neutr Pl
+==> Dig:
+s (NOrd (NCase Sg Nom))
+s (NOrd (NCase Sg Gen))
+s (NOrd (NCase Sg Part))
+s (NOrd (NCase Sg Transl))
+s (NOrd (NCase Sg Iness))
+s (NOrd (NCase Sg Elat))
+s (NOrd (NCase Sg Allat))
+s (NOrd (NCase Sg Adess))
+s (NOrd (NCase Sg Ablat))
+s (NOrd (NCase Pl Nom))
+s (NOrd (NCase Pl Gen))
+s (NOrd (NCase Pl Part))
+s (NOrd (NCase Pl Transl))
+s (NOrd (NCase Pl Iness))
+s (NOrd (NCase Pl Elat))
+s (NOrd (NCase Pl Allat))
+s (NOrd (NCase Pl Adess))
+s (NOrd (NCase Pl Ablat))
 …
 ```
 
-Here we can see that in relative clauses, gender does not seem to play
-any role in plural. This could be a hint for the grammarian to make a
-leaner parameter type, e.g. `param RClAgr = SgAgr <everything incl. gender> | PlAgr <no gender here>`.
-
+Here we can see that digits (as in 1, 2, 3…) do not inflect in number and case. 
+This could be a hint for the grammarian to remove the inflection table altogether from the lincat of `Dig`, and just store a single string.
 
 ### Unused fields: `-u`
 
